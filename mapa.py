@@ -39,6 +39,17 @@ def definePocoWumpus(mapa):
 			return alocaPercepcoes(1, mapa, linha, coluna)
 			break
 
+def defineOuro(mapa):
+	while(True):
+		linha = randint(0, 3) 
+		coluna = randint(0, 3)
+
+		if(mapa[linha][coluna]!='#')and(mapa[linha][coluna]!='@'):
+			mapa[linha][coluna] = 'ouro'
+			return mapa
+			break
+
+
 def printMapa(mapa):
 	i=0
 	while(i<len(mapa)):

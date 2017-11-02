@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 from random import randint
 from mapa import *
+from jogador import *
 
 
 if __name__ == "__main__":
@@ -17,6 +18,6 @@ if __name__ == "__main__":
 					[0,0,0,0]]
 
 	mapa =  definePocoWumpus(mapa)  #### ao fim mapa está pronto
-
+	mapa = defineOuro(mapa)
 
 
