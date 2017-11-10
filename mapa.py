@@ -25,6 +25,7 @@ def definePocoWumpus(mapa):
 	i=0
 	j=0
 	while(True):
+
 		linha = posicoes[j]
 		coluna = posicoes[j+1]
 		j=j+2
@@ -32,22 +33,26 @@ def definePocoWumpus(mapa):
 	
 		#posições possíveis de eu colocar o fedo
 		mapa = alocaPercepcoes(2, mapa, linha, coluna)
-
+		
 		i=i+1
 		### colocando a brisa
 		if (i==3):
+			linha = posicoes[j]
+			coluna = posicoes[j+1]
 			return alocaPercepcoes(1, mapa, linha, coluna)
-			break
+
 
 def defineOuro(mapa):
 	while(True):
 		linha = randint(0, 3) 
 		coluna = randint(0, 3)
 
-		if(mapa[linha][coluna]!='#')and(mapa[linha][coluna]!='@'):
-			mapa[linha][coluna] = 'ouro'
+		if(mapa[linha][coluna]!='@'):
+			if(mapa[linha][coluna]=='#'):
+				mapa[linha][coluna] = '#ouro'
+			else:
+				mapa[linha][coluna]= 'ouro'
 			return mapa
-			break
 
 
 def printMapa(mapa):
@@ -65,5 +70,6 @@ def alocaPercepcoes(p, mapa, linha, coluna):
 		mapa[linha][coluna-1] = mapa[linha][coluna-1] + p
 	if coluna<3 and mapa[linha][coluna+1] != '@' and mapa[linha][coluna+1] != '#':
 		mapa[linha][coluna+1] = mapa[linha][coluna+1] + p
+
 
 	return mapa

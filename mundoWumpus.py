@@ -5,6 +5,9 @@ from mapa import *
 from jogador import *
 
 
+
+
+
 if __name__ == "__main__":
 
 	mapa = [[0,0,0,0],
@@ -12,12 +15,19 @@ if __name__ == "__main__":
 			[0,0,0,0],
 			[0,0,0,0]]
 
-	mapaJogador =  [[0,0,0,0],
+	mapaJogador =  [[None,None,None,None],
+					[None,None,None,None],
+					[None,None,None,None],
+					[None,None,None,None]]
+	
+	mapaVisitado = [[0,0,0,0],
 					[0,0,0,0],
 					[0,0,0,0],
 					[0,0,0,0]]
 
+
 	mapa =  definePocoWumpus(mapa)  #### ao fim mapa está pronto
 	mapa = defineOuro(mapa)
+	caminhaNoMapa(mapa, mapaJogador, mapaVisitado)
 
 
