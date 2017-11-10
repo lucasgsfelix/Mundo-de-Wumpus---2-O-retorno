@@ -93,6 +93,7 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 	j=0
 	flag=0
 	global angulo
+	ultimosVisitados = []
 	while(True):
 		print i, j, '\n'
 		print str(angulo) + "\n"
@@ -100,9 +101,8 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 		print '\n'
 		printMapa(mapa)
 		print '\n'
-		printMapa(mapaVisitado)
-		print '\n'
 		time.sleep(4)
+
 		if(mapa[i][j]=='ouro'):
 			print 'PARABÉNS, VOCÊ CONSEGUIU ALCANÇAR O OURO !!!'
 			print 'SUA PONTUAÇÃO FOI DE \n', pontuacao
@@ -188,52 +188,179 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 			abreMapa(0, mapaJogador, i, j)
 			#atualizo no mapa do jogador que não há perigo a vista
 			## tenho que definir para onde irei andar
-			i, j = avaliaAngulos(i, j, mapaVisitado)
+			i, j = avaliaAngulos(i, j, ultimosVisitados, mapaVisitado)
 		
 		if(mapa[i][j]!=0):
 			mapaVisitado[i][j] = 1 
 
-		if(flag==0 and i==0 and j==0):
+		if(flag==0):
 			flag=1
-			angulo = 270
+			ultimosVisitados.append(str(i)+str(j))
 
+		if all ((str(i)+str(j)) != k for k in  ultimosVisitados):
+			ultimosVisitados.append(str(i)+str(j))
 
+		print ultimosVisitados
 
-
-
-def avaliaAngulos(linha, coluna, mapaVisitado):
-
+def avaliaAngulos(linha, coluna, ultimosVisitados, mapaVisitado):
+	global angulo
 	if (angulo==0) and (coluna<3):
-		medidaDesempenho(-1, "CAMINHOU DA SALA "+ str(linha)+ str(coluna)+ "PARA A SALA"+str(linha)+ str(coluna+1))
-		return linha, coluna+1
-	
+		if all (str(linha)+str(coluna+1) != k for k in ultimosVisitados): # quer dizer que eu não visitei
+			return linha, coluna+1
+		else:
+			if(linha<3):
+				angulo = 270
+				return linha+1, coluna
+			elif(linha==3):
+				angulo = 90
+				return linha-1, coluna
+			elif(coluna==3):
+				angulo = 180
+				return linha, coluna-1
+
 	elif(angulo==0) and (coluna==3):
 		if(linha==0):
 			angulo = 270
+			return linha+1, coluna
 		elif(linha==3):
 			angulo = 90
+			return linha-1, coluna
 		else:
-			if(mapaVisitado[i-1][j]!=1):
+			if all (str(linha-1)+str(coluna) != k for k in ultimosVisitados): # quer dizer que eu não visitei
+				angulo = 90
+				return linha-1, coluna
+
+			elif all (str(linha+1)+str(coluna) != k for k in ultimosVisitados): 
+				angulo = 270
+				return linha+1, coluna
+
+			elif all (str(linha)+str(coluna-1) != k for k in ultimosVisitados): 
+				angulo = 180
+				return linha, coluna-1
+
+	if (angulo==90) and (linha>0):
+		
+		if all (str(linha-1)+str(coluna) != k for k in ultimosVisitados): # quer dizer que eu não visitei
+			return linha-1, coluna
+		else:
+			if(coluna>0):
+				angulo = 180
+				return linha, coluna-1
+			elif(coluna==0):
+				angulo = 0
+				return linha, coluna+1
+			elif(linha==0):
+				angulo = 270
+				return linha+1, coluna
+
+	elif(angulo==90) and (linha==0):
+
+		if(coluna==3):
+			angulo = 270
+			return linha+1, coluna
+		elif(coluna==0):
+			angulo = 0
+			return linha, coluna+1
+		else:
+			if all (str(linha)+str(coluna+1) != k for k in ultimosVisitados): # quer dizer que eu não visitei
+				angulo = 0
+				return linha, coluna+1
+
+			elif all (str(linha+1)+str(coluna) != k for k in ultimosVisitados): 
+				angulo = 270
+				return linha+1, coluna
+
+			elif all (str(linha)+str(coluna-1) != k for k in ultimosVisitados): 
+				angulo = 180
+				return linha, coluna-1
+
+	if (angulo==180) and (coluna>0):
+
+		if all (str(linha)+str(coluna-1) != k for k in ultimosVisitados): # quer dizer que eu não visitei
+			return linha, coluna-1
+		else:
+			if(linha>0):
+				angulo = 90
+				return linha-1, coluna
+			elif(linha==0):
+				angulo = 270
+				return linha+1, coluna
+			elif(coluna==0):
+				angulo = 0
+				return linha, coluna+1
+		
+	
+	elif(angulo==180) and (coluna==0):
+		
+		if(linha==0):
+			angulo = 270
+			return linha+1, coluna
+
+		elif(linha==3):
+			angulo = 0 
+			return linha, coluna+1
+
+		else:
+
+			if all (str(linha)+str(coluna+1) != k for k in ultimosVisitados): # quer dizer que eu não visitei
+				angulo = 0
+				return linha, coluna+1
+
+			elif all (str(linha+1)+str(coluna) != k for k in ultimosVisitados): 
+				angulo = 270
+				return linha+1, coluna
+
+			elif all (str(linha-1)+str(coluna) != k for k in ultimosVisitados): 
+				angulo = 90
+				return linha-1, coluna
 
 
-			elif(mapaVisitado[i+1][j]!=1):
 
-			elif(mapaVisitado[i][j-1]!=1):
+	if (angulo==270) and (linha<3):
 
-	if (angulo==90) and (linha<3):
-		medidaDesempenho(-1, "CAMINHOU DA SALA "+ str(linha)+ str(coluna)+ "PARA A SALA"+ str(linha+1)+ str(coluna))
-		return linha+1, coluna
+		if all (str(linha+1)+str(coluna) != k for k in ultimosVisitados): # quer dizer que eu não visitei
+			return linha+1, coluna
+		else:
+			if(coluna>0):
+				angulo = 180
+				return linha, coluna-1
+			elif(coluna==0):
+				angulo = 0
+				return linha, coluna+1
+			elif(linha==3):
+				angulo = 90
+				return linha-1, coluna
 
-	elif (angulo==180) and (coluna>0):
-		medidaDesempenho(-1, "CAMINHOU DA SALA "+ str(linha)+ str(coluna)+ "PARA A SALA"+ str(linha)+ str(coluna-1))
-		return linha, coluna-1
+	elif(angulo==270) and (linha==3):
 
-	elif (angulo==270) and (linha>0):
-		medidaDesempenho(-1, "CAMINHOU DA SALA "+ str(linha)+ str(coluna)+ "PARA A SALA"+ str(linha-1)+ str(coluna))
-		return linha-1, coluna
+		if(coluna==0):
+			angulo = 0
+			return linha, coluna+1
 
-	else: # tenho que fazer avaliações otimizadas aqui
-		return avaliaAngulosEspeciais(linha, coluna)
+		elif(coluna==3):
+			angulo = 90
+			return linha-1, coluna
+
+		else:
+			if all (str(linha)+str(coluna+1) != k for k in ultimosVisitados): # quer dizer que eu não visitei
+				angulo = 0
+				return linha, coluna+1
+
+			elif all (str(linha)+str(coluna-1) != k for k in ultimosVisitados): 
+				angulo = 180
+				return linha, coluna-1
+
+			elif all (str(linha-1)+str(coluna) != k for k in ultimosVisitados): 
+				angulo = 90
+				return linha-1, coluna
+
+			
+
+
+
+
+	'''else: # tenho que fazer avaliações otimizadas aqui
+		return avaliaAngulosEspeciais(linha, coluna)'''
 
 
 def calculo(x, y):
