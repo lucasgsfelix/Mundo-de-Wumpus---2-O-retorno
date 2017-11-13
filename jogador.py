@@ -98,6 +98,8 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 	quantIteracoes = 0
 	mapaAux  = []
 	verticesSemBuraco = []
+	probabilidades = {}
+	caminho_proposto=[]
 	while(True):
 		#time.sleep(4)
 
@@ -111,6 +113,12 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 
 		elif((mapa[i][j]=='@')or(mapa[i][j]=='#')or(mapa[i][j]=='#ouro')):
 			print 'GAME OVER!'
+			printMapa(mapa)
+			print "Probabilidades"
+			for i in list(probabilidades):
+				print i,probabilidades[i]
+			print "------------------------"
+			print "Caminho Proposto",caminho_proposto
 			if(mapa[i][j]=='@'): print "VOCÊ CAIU NUM BURACO !"
 			else: print "VOCẼ FOI MORTO PELO WUMPUS !" 
 			
@@ -212,6 +220,8 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 				tabelaProbabilidade = {}
 				quantIteracoes=0
 				posicoes, tabelaProbabilidade = inducao(mapaJogador,[i,j],angulo,ultimosVisitados)
+				caminho_proposto.append(posicoes)
+				probabilidades = tabelaProbabilidade
 				mapaProbrabilidade = geraMapaProbabilidades(tabelaProbabilidade)
 				quantIteracoes = 0
 				i = posicoes[0]

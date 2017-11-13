@@ -27,6 +27,20 @@ def exibe_mapa(mapa_descoberto):
 		print i
 	print"-----------------"
 
+
+# def corrige_mapa(mapa_descoberto):
+# 	for i in range(0,4):
+# 		for j in range(0,4):
+# 			if(mapa_descoberto[i][j] is '@'):
+# 				mapa_descoberto=None
+# 			elif(mapa_descoberto[i][j] is '#'):
+# 				mapa_descoberto=None
+	#return mapa_descoberto
+
+def marca_posicao(posicao,caminho_visitado):
+	caminho_visitado.append(posicao)
+	return caminho_visitado
+
 def marca_visitado(probabilidade,caminho_visitado):
 	"""Marca o caminho como visitado"""
 	for i in caminho_visitado:
@@ -70,7 +84,6 @@ def processa_estado(probabilidade,posicao,angulo):
 	#print "---------------" 
 	lista=ordena(caminhos,2)
 	lista =ordena(caminhos,0)
-	
 	return lista
 
 def arrumaCaminhoVisitado(caminho_visitado):
@@ -92,6 +105,8 @@ def inducao(mapa_descoberto,posicao,angulo,caminho_visitado):
 	i=0
 
 	caminho_visitado=arrumaCaminhoVisitado(caminho_visitado)
+	#smapa_descoberto = corrige_mapa(mapa_descoberto)
+	caminho_visitado=marca_posicao(posicao, caminho_visitado)
 
 	estados=[2,1,3,4,5,6]
 
@@ -121,6 +136,10 @@ def inducao(mapa_descoberto,posicao,angulo,caminho_visitado):
 	probabilidade = marca_visitado(probabilidade, caminho_visitado)
 	#exibe_probabilidade(probabilidade)
 	escolhas=processa_estado(probabilidade, posicao,angulo)
+	print "Escolhas",escolhas
+	print "Posicao",posicao
+	print "-----------------"
+	print exibe_mapa(mapa_descoberto)
 	return escolhas[0][1],probabilidade
 	
 #caminho_visitado= []#[[0,0],[0,1],[0,2],[2,3],[0,3],[3,3],[1,2]]
