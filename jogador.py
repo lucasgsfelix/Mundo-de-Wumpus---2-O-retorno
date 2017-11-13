@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 from random import randint
 from mapa import *
+from inducao import *
 import time
 
 angulo = 0
@@ -94,14 +95,11 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 	flag=0
 	global angulo
 	ultimosVisitados = []
+	quantIteracoes = 0
+	mapaAux  = []
+	verticesSemBuraco = []
 	while(True):
-		print i, j, '\n'
-		print str(angulo) + "\n"
-		printMapa(mapaJogador)
-		print '\n'
-		printMapa(mapa)
-		print '\n'
-		time.sleep(4)
+		#time.sleep(4)
 
 		if(mapa[i][j]=='ouro'):
 			print 'PARABÉNS, VOCÊ CONSEGUIU ALCANÇAR O OURO !!!'
@@ -188,7 +186,11 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 			abreMapa(0, mapaJogador, i, j)
 			#atualizo no mapa do jogador que não há perigo a vista
 			## tenho que definir para onde irei andar
+			if(i==None or j==None):
+				i=0
+				j=0
 			i, j = avaliaAngulos(i, j, ultimosVisitados, mapaVisitado)
+
 		
 		if(mapa[i][j]!=0):
 			mapaVisitado[i][j] = 1 
@@ -200,7 +202,136 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 		if all ((str(i)+str(j)) != k for k in  ultimosVisitados):
 			ultimosVisitados.append(str(i)+str(j))
 
-		print ultimosVisitados
+		if(quantIteracoes==0):
+			mapaAux = mapaJogador
+
+		if(contNone(mapaJogador)==contNone(mapaAux)):
+			quantIteracoes = quantIteracoes + 1
+			if(quantIteracoes==50):
+				posicoes = []
+				tabelaProbabilidade = {}
+				quantIteracoes=0
+				posicoes, tabelaProbabilidade = inducao(mapaJogador,[i,j],angulo,ultimosVisitados)
+				mapaProbrabilidade = geraMapaProbabilidades(tabelaProbabilidade)
+				quantIteracoes = 0
+				i = posicoes[0]
+				j = posicoes[1]
+				if(type(mapaJogador[i][j])==int) and (mapaJogador[i][j]%2!=0):#quer dizer que eu to no wumpus
+					mapa, mapaJogador = tacarFlecha(tabelaProbabilidade, mapa, mapaProbrabilidade)
+				elif (type(mapaJogador[i][j])==int) and (mapaJogador[i][j]%2==0): #quer dizer que estou tratando buracos
+					menorP = menorProbabilidade(mapaProbrabilidade)
+					mapaJogador[i][j] = 0
+					if(mapaProbrabilidade[i][j]==0 or mapaProbrabilidade[i][j]==menorP) and type(mapa[i][j])!=str:
+						i, j = avaliaAngulos(i, j, ultimosVisitados, mapaVisitado)
+
+				mapaAux = mapaJogador
+		else:
+			mapaAux = mapaJogador
+			quantIteracoes = 0
+
+def contNone(mapa):
+	cont=0
+	i=0
+	while(i<len(mapa)):
+		j=0
+		while(j<len(mapa[i])):
+			if(mapa[i][j]==None):
+				cont=cont+1
+			j=j+1
+		i=i+1
+
+	return cont
+
+def menorProbabilidade(mapaProbrabilidade):
+	aux = 1
+	i=0
+	x = 1
+	while(i<len(mapaProbrabilidade)):
+		j=0
+		while(j<len(mapaProbrabilidade[i])):
+			if(mapaProbrabilidade[i][j]<aux) and (mapaProbrabilidade[i][j]!=0):
+				aux = mapaProbrabilidade[i][j]
+			j=j+1
+		i=i+1
+	return aux
+def tacarFlecha(tabelaProbabilidade, mapa, mapaJogador):
+	posicaoCorreta = maiorValorDic(tabelaProbabilidade)
+	#é hora de atirar flecha
+	if((mapa[posicaoCorreta[0]][posicaoCorreta[1]]=='#')or(mapa[posicaoCorreta[0]][posicaoCorreta[1]]=='#ouro')):
+		print 'PARABÉNS, VOCÊ MATOU O WUMPUS !'
+		mapa=retiraWumpusFedo(mapa)
+		mapaJogador=retiraWumpusFedo(mapaJogador)
+	else:
+		print 'ERROU A FLECHADA ! :/'
+	return mapa, mapaJogador
+
+def geraMapaProbabilidades(tabelaProbabilidade):
+	i=0
+	mapa = [[0,0,0,0],
+			[0,0,0,0],
+			[0,0,0,0],
+			[0,0,0,0]]
+	#value é a probabilidade
+	while(i<len(tabelaProbabilidade.values())):
+		posicao = tabelaProbabilidade.keys()[i]
+		if(type(posicao[0])==str) and (type(posicao[1])==str):
+			mapa[int(posicao[0])][int(posicao[1])] = tabelaProbabilidade.values()[i]
+		else:
+			mapa[posicao[0]][posicao[1]] = tabelaProbabilidade.values()[i]
+		i=i+1
+
+
+	return mapa
+				
+def retiraFalsosBuracos(tabelaProbabilidade, mapa):
+
+	i=0
+	aux = 0
+	while(i<len(tabelaProbabilidade.values())):
+		if(aux<tabelaProbabilidade.values()[i]):
+			aux = tabelaProbabilidade.values()[i]
+			p = i
+		i=i+1
+
+	del tabelaProbabilidade[tabelaProbabilidade.keys()[p]] #retiro o com maior probabilidade
+
+	i=0
+	novaProbabilidade = []
+	while(i<len(tabelaProbabilidade.values())):
+		if(tabelaProbabilidade.values()[i]!=0):
+			novaProbabilidade.append(tabelaProbabilidade.keys()[i])
+		i=i+1
+	
+
+def maiorValorDic(tabelaProbabilidade):
+	i=0
+	aux = 0
+	while(i<len(tabelaProbabilidade.values())):
+		if(aux<tabelaProbabilidade.values()[i]):
+			aux = tabelaProbabilidade.values()[i]
+			p = i
+		i=i+1
+
+	return tabelaProbabilidade.keys()[p]
+
+def retiraWumpusFedo(mapa):
+	i=0
+	j=0
+	while(i<len(mapa)):
+		j=0
+		while(j<len(mapa[i])):
+			if(mapa[i][j]=='#'):
+				mapa[i][j]=0
+			elif(type(mapa[i][j])==int) and (mapa[i][j]%2!=0):
+				mapa[i][j]=mapa[i][j]-1
+			elif(mapa[i][j]=='#ouro'):
+				mapa[i][j]='ouro'
+			else:
+				mapa[i][j]=mapa[i][j]
+			j=j+1
+		i=i+1
+	return mapa
+
 
 def avaliaAngulos(linha, coluna, ultimosVisitados, mapaVisitado):
 	global angulo

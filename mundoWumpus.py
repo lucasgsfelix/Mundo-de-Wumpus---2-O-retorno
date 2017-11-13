@@ -3,6 +3,7 @@
 from random import randint
 from mapa import *
 from jogador import *
+from inducao import *
 
 
 
