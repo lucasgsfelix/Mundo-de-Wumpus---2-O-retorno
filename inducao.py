@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+
+
 import random
 import numpy as np
 
@@ -26,20 +28,6 @@ def exibe_mapa(mapa_descoberto):
 	for i in mapa_descoberto:
 		print i
 	print"-----------------"
-
-
-# def corrige_mapa(mapa_descoberto):
-# 	for i in range(0,4):
-# 		for j in range(0,4):
-# 			if(mapa_descoberto[i][j] is '@'):
-# 				mapa_descoberto=None
-# 			elif(mapa_descoberto[i][j] is '#'):
-# 				mapa_descoberto=None
-	#return mapa_descoberto
-
-def marca_posicao(posicao,caminho_visitado):
-	caminho_visitado.append(posicao)
-	return caminho_visitado
 
 def marca_visitado(probabilidade,caminho_visitado):
 	"""Marca o caminho como visitado"""
@@ -84,63 +72,93 @@ def processa_estado(probabilidade,posicao,angulo):
 	#print "---------------" 
 	lista=ordena(caminhos,2)
 	lista =ordena(caminhos,0)
+	
 	return lista
 
-def arrumaCaminhoVisitado(caminho_visitado):
-	xy = []
-	i=0
-	while(i<len(caminho_visitado)):
-		lista = []
-		x = caminho_visitado[i][0]
-		y = caminho_visitado[i][1]
-		lista.append(int(x))
-		lista.append(int(y))
-		xy.append(lista)
-		i=i+1
-	return xy
+def verifica_visitado(posicao,caminho):
+	if(posicao in caminho):
+		return True
+	else:
+		return False
 
 def inducao(mapa_descoberto,posicao,angulo,caminho_visitado):
 	"""Resolve o problema de indecisão"""
 	# 2 brisa,
-	i=0
-
-	caminho_visitado=arrumaCaminhoVisitado(caminho_visitado)
-	#smapa_descoberto = corrige_mapa(mapa_descoberto)
-	caminho_visitado=marca_posicao(posicao, caminho_visitado)
-
 	estados=[2,1,3,4,5,6]
 
 	acrescimo=0.25
+	estado_especial = False
 	#dicionario com as probabilidades
 	probabilidade=preenche_dicio()
 	#exibe_mapa(mapa_descoberto)
 	for linha in range(0,len(mapa_descoberto)):
 		for coluna in range(0, len(mapa_descoberto[linha])):
 			if (mapa_descoberto[linha][coluna] in estados):
-				if((coluna+1)<4):
-					probabilidade[linha,coluna+1]+=acrescimo
-				if((coluna-1)>=0):
-					probabilidade[linha,coluna-1]+=acrescimo
-				if((linha+1)<4):
-					probabilidade[linha+1,coluna]+=acrescimo
-				if((linha-1)>=0):
-					probabilidade[linha-1,coluna]+=acrescimo
-		# 	print posicao
-		# print "--------------"
-	#exibe_probabilidade(probabilidade)
-	#print "Posicao",posicao,"Angulo",angulo
-	#print "Já visitado",caminho_visitado
-	#mapa_descoberto[posicao[0]][posicao[1]]="P "+str(90)
-	#exibe_mapa(mapa_descoberto)
-	#print "Zerada"
+
+				if((linha is 0) and (coluna is 3)):
+					if(verifica_visitado([linha,coluna-1],caminho_visitado)):
+						probabilidade[linha+1,coluna]=1
+						estado_especial= True
+				elif((linha is 1) and (coluna is 0)):
+					if(verifica_visitado([linha,coluna+1],caminho_visitado)):
+						probabilidade[linha+1,coluna-1]=1
+						estado_especial= True
+				elif((linha is 2) and (coluna is 0)):
+					if(verifica_visitado([linha,coluna+1],caminho_visitado)):
+						probabilidade[linha+1,coluna+1]=1
+						estado_especial= True
+				else:
+					if((coluna+1)<4):
+						probabilidade[linha,coluna+1]+=acrescimo
+					if((coluna-1)>=0):
+						probabilidade[linha,coluna-1]+=acrescimo
+					if((linha+1)<4):
+						probabilidade[linha+1,coluna]+=acrescimo
+					if((linha-1)>=0):
+						probabilidade[linha-1,coluna]+=acrescimo
 	probabilidade = marca_visitado(probabilidade, caminho_visitado)
 	#exibe_probabilidade(probabilidade)
 	escolhas=processa_estado(probabilidade, posicao,angulo)
-	print "Escolhas",escolhas
-	print "Posicao",posicao
-	print "-----------------"
-	print exibe_mapa(mapa_descoberto)
-	return escolhas[0][1],probabilidade
+	print type(probabilidade)
+	mapaProbabilidade = geraMapaProbabilidades(probabilidade)
+	mapaProbabilidade = zeraProb(mapaProbabilidade, caminho_visitado)
+	if estado_especial is True:
+		return posicao,mapaProbabilidade
+	return escolhas[0][1], mapaProbabilidade
+
+def zeraProb(mapaProbabilidade, caminhosVisitados):
+
+	i=0
+	while(i<len(mapaProbabilidade)):
+		j=0
+		while(j<len(mapaProbabilidade[i])):
+			
+			if any (mapaProbabilidade[i][j] == k for k in caminhosVisitados):
+
+				mapaProbabilidade[i][j] = 0
+				
+			j=j+1
+
+		i=i+1
+
+	return mapaProbabilidade
+
+def geraMapaProbabilidades(tabelaProbabilidade): 
+	#print "TIPO",type(tabelaProbabilidade)
+	i=0
+	mapa = [[0,0,0,0],
+			[0,0,0,0],
+			[0,0,0,0],
+			[0,0,0,0]]
+	#value é a probabilidade
+	while(i<len(tabelaProbabilidade.values())):
+		posicao = tabelaProbabilidade.keys()[i]
+		if(type(posicao[0])==str) and (type(posicao[1])==str):
+			mapa[int(posicao[0])][int(posicao[1])] = tabelaProbabilidade.values()[i]
+		else:
+			mapa[posicao[0]][posicao[1]] = tabelaProbabilidade.values()[i]
+		i=i+1
+
+
+	return mapa
 	
-#caminho_visitado= []#[[0,0],[0,1],[0,2],[2,3],[0,3],[3,3],[1,2]]
-#print inducao(mapa_descoberto,[0,0],0,caminho_visitado)
