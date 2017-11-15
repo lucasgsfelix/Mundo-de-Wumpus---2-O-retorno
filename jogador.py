@@ -3,6 +3,7 @@
 from random import randint
 from mapa import *
 from inducao import *
+from logica import *
 import time
 
 angulo = 0
@@ -78,7 +79,7 @@ def caminhoDeVolta(mapa, i, j):
 	elif (i<3) and (mapa[i+1][j]!='@') and (mapa[i+1][j]!='#'):
 		medidaDesempenho(-1, "CAMINHOU DA SALA "+ str(i)+ str(j)+ " PARA A SALA "+str(i+1)+ str(j))
 		i = i +1
-	elif (j>0) and (mapa[i][j-1]!='@') and (mapa[i+1][j]!='#'):
+	elif ((j>0) and (mapa[i][j-1]!='@')) and (i<3 and (mapa[i+1][j]!='#')):
 		medidaDesempenho(-1, "CAMINHOU DA SALA "+ str(i)+ str(j)+ " PARA A SALA "+str(i)+ str(j-1))
 		j=j-1
 	elif (j<3) and (mapa[i][j+1]!='@') and (mapa[i+1][j]!='#'):
@@ -89,36 +90,36 @@ def caminhoDeVolta(mapa, i, j):
 
 	return i, j
 
-def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
+def caminhaNoMapa(mapa, mapaJogador):
+	caminho_sucesso=[]
 	i=0
 	j=0
 	flag=0
 	global angulo
 	ultimosVisitados = []
-	quantIteracoes = 0
-	mapaAux  = []
-	verticesSemBuraco = []
-	probabilidades = {}
-	caminho_proposto=[]
-	while(True):
+	verticesIndicados = []
+	iteracoes = 0
+	verificadorLoop = 0
+	while(iteracoes<1000):
+		print i, j, '\n'
+		caminho_sucesso.append([i,j])
+		print str(angulo) + "\n"
+		printMapa(mapaJogador)
+		print '\n'
+		printMapa(mapa)
+		print '\n'
 		#time.sleep(4)
-
 		if(mapa[i][j]=='ouro'):
 			print 'PARABÉNS, VOCÊ CONSEGUIU ALCANÇAR O OURO !!!'
 			print 'SUA PONTUAÇÃO FOI DE \n', pontuacao
 			print 'SUA LISTA DE AÇÕES FOI \n', ''.join(listaPontuacao)
 			print 'SEU MAPA DESCOBERTO FOI \n', printMapa(mapaJogador)
 			print 'O MAPA TOTAL ERA \n', printMapa(mapa)
+			return caminho_sucesso,mapa
 			break
 
 		elif((mapa[i][j]=='@')or(mapa[i][j]=='#')or(mapa[i][j]=='#ouro')):
 			print 'GAME OVER!'
-			printMapa(mapa)
-			print "Probabilidades"
-			for i in list(probabilidades):
-				print i,probabilidades[i]
-			print "------------------------"
-			print "Caminho Proposto",caminho_proposto
 			if(mapa[i][j]=='@'): print "VOCÊ CAIU NUM BURACO !"
 			else: print "VOCẼ FOI MORTO PELO WUMPUS !" 
 			
@@ -127,7 +128,7 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 		elif(mapa[i][j]==6): #tenho poço por perto
 
 			mapaJogador[i][j] = 6
-			abreMapa('@', mapaJogador, i, j)
+			#abreMapa('@', mapaJogador, i, j)
 			## tenho que definir para onde irei andar
 			###volto cuidadosamente no caminho que eu fui
 			i,j = caminhoDeVoltaPoco(mapa, i, j)
@@ -139,7 +140,7 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 			
 			# posso inferir onde estão os poços e wumpus
 
-			abreMapa('#@', mapaJogador, i, j) 
+			#abreMapa('#@', mapaJogador, i, j) 
 			caminhoDeVolta(mapa, i, j)
 			
 
@@ -151,7 +152,7 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 			
 			mapaJogador[i][j]=4
 
-			abreMapa('@', mapaJogador, i, j)
+			#abreMapa('@', mapaJogador, i, j)
 			i, j = caminhoDeVoltaPoco(mapa, i, j)
 
 			mapaJogador[i][j] = 0
@@ -161,7 +162,7 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 		elif(mapa[i][j]==3): #tenho poço e wumpus por perto  
 			
 			mapaJogador[i][j]=3
-			abreMapa('#@', mapaJogador, i, j)
+			#abreMapa('#@', mapaJogador, i, j)
 			i, j = caminhoDeVolta(mapa, i, j)
 
 			mapaJogador[i][j] = 0
@@ -171,7 +172,7 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 		elif(mapa[i][j]==2): #tenho poço e wumpus por perto  
 			
 			mapaJogador[i][j] = 2
-			abreMapa('@', mapaJogador, i, j)
+			#abreMapa('@', mapaJogador, i, j)
 			i, j = caminhoDeVoltaPoco(mapa, i, j)
 
 			mapaJogador[i][j] = 0
@@ -179,29 +180,24 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 		elif(mapa[i][j]==1): #tenho wumpus por perto
 			
 			mapaJogador[i][j] = 1
-			abreMapa('#', mapaJogador, i, j)
+			#abreMapa('#', mapaJogador, i, j)
 			i, j = caminhoDeVoltaWumpus(mapa, i, j)
 
 			mapaJogador[i][j] = 0
-
-			### marco nas 
-
 
 			## tenho que definir para onde irei andar
 		elif(mapa[i][j]==0):
 
 			mapaJogador[i][j]=0
-			abreMapa(0, mapaJogador, i, j)
+			#abreMapa(0, mapaJogador, i, j)
 			#atualizo no mapa do jogador que não há perigo a vista
 			## tenho que definir para onde irei andar
-			if(i==None or j==None):
-				i=0
-				j=0
-			i, j = avaliaAngulos(i, j, ultimosVisitados, mapaVisitado)
+			if(i!=None and j!=None):
+				i, j = avaliaAngulos(i, j, ultimosVisitados)
+			else:
+				if(i==None):i=0
+				elif(j==None):j=0
 
-		
-		if(mapa[i][j]!=0):
-			mapaVisitado[i][j] = 1 
 
 		if(flag==0):
 			flag=1
@@ -210,140 +206,104 @@ def caminhaNoMapa(mapa, mapaJogador, mapaVisitado):
 		if all ((str(i)+str(j)) != k for k in  ultimosVisitados):
 			ultimosVisitados.append(str(i)+str(j))
 
-		if(quantIteracoes==0):
-			mapaAux = mapaJogador
+		if(mapa[i][j]==2): 
 
-		if(contNone(mapaJogador)==contNone(mapaAux)):
-			quantIteracoes = quantIteracoes + 1
-			if(quantIteracoes==50):
-				posicoes = []
-				tabelaProbabilidade = {}
-				quantIteracoes=0
-				posicoes, tabelaProbabilidade = inducao(mapaJogador,[i,j],angulo,ultimosVisitados)
-				caminho_proposto.append(posicoes)
-				probabilidades = tabelaProbabilidade
-				mapaProbrabilidade = geraMapaProbabilidades(tabelaProbabilidade)
-				quantIteracoes = 0
-				i = posicoes[0]
-				j = posicoes[1]
-				if(type(mapaJogador[i][j])==int) and (mapaJogador[i][j]%2!=0):#quer dizer que eu to no wumpus
-					mapa, mapaJogador = tacarFlecha(tabelaProbabilidade, mapa, mapaProbrabilidade)
-				elif (type(mapaJogador[i][j])==int) and (mapaJogador[i][j]%2==0): #quer dizer que estou tratando buracos
-					menorP = menorProbabilidade(mapaProbrabilidade)
-					mapaJogador[i][j] = 0
-					if(mapaProbrabilidade[i][j]==0 or mapaProbrabilidade[i][j]==menorP) and type(mapa[i][j])!=str:
-						i, j = avaliaAngulos(i, j, ultimosVisitados, mapaVisitado)
+			p, mapaProbabilidade = inducao(mapaJogador,[i,j],angulo,ultimosVisitados)
+			menorProb = menorProbabilidade(mapaProbabilidade)
+			if(len(verticesIndicados)>0):
+				if any (p == k for k in verticesIndicados):
+					#prob = mapaProbabilidade[p[0]][p[1]] #probabilidade do vértice indicado
+					p = verificaVerticeProb(mapaProbabilidade, menorProb, p[0], p[1])
 
-				mapaAux = mapaJogador
-		else:
-			mapaAux = mapaJogador
-			quantIteracoes = 0
+		 	if not (verificaValorProb(mapaProbabilidade, menorProb)): # se todas as minhas probabilidades forem iguais a
+		 	#minha menor probabilidade, quer dizer que a heuristica ainda não esta boa
+		 		i = p[0]
+		 		j = p[1]
 
-def contNone(mapa):
-	cont=0
+		 	verticesIndicados.append(p)
+
+		elif(mapa[i][j]==1):
+
+
+		 	x = inducaoLogica(mapaJogador, i, j, ultimosVisitados)
+		 	flag=flag+1
+		 	if(flag==3):
+		 		print x 
+		 		#exit()
+		 	
+		if(iteracoes==50):
+			print i, j, angulo
+			printMapa(mapaProbabilidade)
+	 		exit()
+
+	 	if(verificadorLoop==0):
+	 		mapaAux = mapaJogador
+	 	if(mapaAux==mapaJogador):
+	 		verificadorLoop = verificadorLoop + 1 
+	 		if(verificadorLoop==50):
+	 			angulo = 0
+	 			i=0
+	 			j=0
+	 			verificadorLoop = 0
+	 	else:
+	 		verificadorLoop = 0
+	 		mapaAux = mapaJogador
+
+
+		
+
+		iteracoes = iteracoes + 1
+	if(iteracoes==1000):print 'O JOGO NÃO TINHA SOLUÇÃO'
+
+def verificaVerticeProb(mapaProbabilidade, prob, linha, coluna):
+		
 	i=0
-	while(i<len(mapa)):
+	p = []
+	while(i<len(mapaProbabilidade)):
 		j=0
-		while(j<len(mapa[i])):
-			if(mapa[i][j]==None):
-				cont=cont+1
+		while(j<len(mapaProbabilidade[i])):
+
+			if(mapaProbabilidade[i][j] == prob and i!=linha and j!=coluna):
+				p.append(i)
+				p.append(j)
+				return p
 			j=j+1
 		i=i+1
 
-	return cont
+	p.append(linha)
+	p.append(coluna)
+	return p
+def verificaValorProb(mapaProbabilidade, menorProb):
 
-def menorProbabilidade(mapaProbrabilidade):
+	i=0
+	while(i<len(mapaProbabilidade)):
+		j=0
+		while(j<len(mapaProbabilidade)):
+
+			if(mapaProbabilidade[i][j]!=menorProb) and (mapaProbabilidade[i][j]!=0):
+
+				return False
+
+			j=j+1
+		i=i+1
+
+	return True
+
+
+def menorProbabilidade(mapaProbabilidade):
 	aux = 1
 	i=0
-	x = 1
-	while(i<len(mapaProbrabilidade)):
+	while(i<len(mapaProbabilidade)):
 		j=0
-		while(j<len(mapaProbrabilidade[i])):
-			if(mapaProbrabilidade[i][j]<aux) and (mapaProbrabilidade[i][j]!=0):
-				aux = mapaProbrabilidade[i][j]
+		while(j<len(mapaProbabilidade[i])):
+			if(mapaProbabilidade[i][j]<aux) and (mapaProbabilidade[i][j]!=0):
+				aux = mapaProbabilidade[i][j]
 			j=j+1
 		i=i+1
 	return aux
-def tacarFlecha(tabelaProbabilidade, mapa, mapaJogador):
-	posicaoCorreta = maiorValorDic(tabelaProbabilidade)
-	#é hora de atirar flecha
-	if((mapa[posicaoCorreta[0]][posicaoCorreta[1]]=='#')or(mapa[posicaoCorreta[0]][posicaoCorreta[1]]=='#ouro')):
-		print 'PARABÉNS, VOCÊ MATOU O WUMPUS !'
-		mapa=retiraWumpusFedo(mapa)
-		mapaJogador=retiraWumpusFedo(mapaJogador)
-	else:
-		print 'ERROU A FLECHADA ! :/'
-	return mapa, mapaJogador
-
-def geraMapaProbabilidades(tabelaProbabilidade):
-	i=0
-	mapa = [[0,0,0,0],
-			[0,0,0,0],
-			[0,0,0,0],
-			[0,0,0,0]]
-	#value é a probabilidade
-	while(i<len(tabelaProbabilidade.values())):
-		posicao = tabelaProbabilidade.keys()[i]
-		if(type(posicao[0])==str) and (type(posicao[1])==str):
-			mapa[int(posicao[0])][int(posicao[1])] = tabelaProbabilidade.values()[i]
-		else:
-			mapa[posicao[0]][posicao[1]] = tabelaProbabilidade.values()[i]
-		i=i+1
 
 
-	return mapa
-				
-def retiraFalsosBuracos(tabelaProbabilidade, mapa):
-
-	i=0
-	aux = 0
-	while(i<len(tabelaProbabilidade.values())):
-		if(aux<tabelaProbabilidade.values()[i]):
-			aux = tabelaProbabilidade.values()[i]
-			p = i
-		i=i+1
-
-	del tabelaProbabilidade[tabelaProbabilidade.keys()[p]] #retiro o com maior probabilidade
-
-	i=0
-	novaProbabilidade = []
-	while(i<len(tabelaProbabilidade.values())):
-		if(tabelaProbabilidade.values()[i]!=0):
-			novaProbabilidade.append(tabelaProbabilidade.keys()[i])
-		i=i+1
-	
-
-def maiorValorDic(tabelaProbabilidade):
-	i=0
-	aux = 0
-	while(i<len(tabelaProbabilidade.values())):
-		if(aux<tabelaProbabilidade.values()[i]):
-			aux = tabelaProbabilidade.values()[i]
-			p = i
-		i=i+1
-
-	return tabelaProbabilidade.keys()[p]
-
-def retiraWumpusFedo(mapa):
-	i=0
-	j=0
-	while(i<len(mapa)):
-		j=0
-		while(j<len(mapa[i])):
-			if(mapa[i][j]=='#'):
-				mapa[i][j]=0
-			elif(type(mapa[i][j])==int) and (mapa[i][j]%2!=0):
-				mapa[i][j]=mapa[i][j]-1
-			elif(mapa[i][j]=='#ouro'):
-				mapa[i][j]='ouro'
-			else:
-				mapa[i][j]=mapa[i][j]
-			j=j+1
-		i=i+1
-	return mapa
-
-
-def avaliaAngulos(linha, coluna, ultimosVisitados, mapaVisitado):
+def avaliaAngulos(linha, coluna, ultimosVisitados):
 	global angulo
 	if (angulo==0) and (coluna<3):
 		if all (str(linha)+str(coluna+1) != k for k in ultimosVisitados): # quer dizer que eu não visitei
