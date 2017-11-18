@@ -1,5 +1,14 @@
 #!/usr/bin/env python2.7.12
 #-*- coding: utf-8 -*-
+"""
+Mundo do Wumpus 
+Lucas Felix
+Carlos Magno
+Matheus Reis
+Samuel Ribeiro
+UFSJ 2017
+
+"""
 from random import randint
 from mapa import *
 from jogador import *
