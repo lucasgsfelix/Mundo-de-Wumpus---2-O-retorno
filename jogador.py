@@ -92,6 +92,7 @@ def caminhoDeVolta(mapa, i, j):
 
 def caminhaNoMapa(mapa, mapaJogador):
 	caminho_sucesso=[]
+	sucesso= True
 	i=0
 	j=0
 	flag=0
@@ -100,6 +101,7 @@ def caminhaNoMapa(mapa, mapaJogador):
 	verticesIndicados = []
 	iteracoes = 0
 	verificadorLoop = 0
+	print "LOG"
 	while(iteracoes<1000):
 		print i, j, '\n'
 		caminho_sucesso.append([i,j])
@@ -111,15 +113,18 @@ def caminhaNoMapa(mapa, mapaJogador):
 		#time.sleep(4)
 		if(mapa[i][j]=='ouro'):
 			print 'PARABÉNS, VOCÊ CONSEGUIU ALCANÇAR O OURO !!!'
-			print 'SUA PONTUAÇÃO FOI DE \n', pontuacao
-			print 'SUA LISTA DE AÇÕES FOI \n', ''.join(listaPontuacao)
+			#print 'SUA PONTUAÇÃO FOI DE \n', pontuacao
+			#print 'SUA LISTA DE AÇÕES FOI \n', ''.join(listaPontuacao)
 			print 'SEU MAPA DESCOBERTO FOI \n', printMapa(mapaJogador)
 			print 'O MAPA TOTAL ERA \n', printMapa(mapa)
-			return caminho_sucesso,mapa
+			return caminho_sucesso,mapa,sucesso
 			break
 
 		elif((mapa[i][j]=='@')or(mapa[i][j]=='#')or(mapa[i][j]=='#ouro')):
+			print i,j
 			print 'GAME OVER!'
+			sucesso = False
+			return caminho_sucesso,mapa,sucesso
 			if(mapa[i][j]=='@'): print "VOCÊ CAIU NUM BURACO !"
 			else: print "VOCẼ FOI MORTO PELO WUMPUS !" 
 			
@@ -192,7 +197,7 @@ def caminhaNoMapa(mapa, mapaJogador):
 			#abreMapa(0, mapaJogador, i, j)
 			#atualizo no mapa do jogador que não há perigo a vista
 			## tenho que definir para onde irei andar
-			if(i!=None and j!=None):
+			if(i is not None):
 				i, j = avaliaAngulos(i, j, ultimosVisitados)
 			else:
 				if(i==None):i=0
@@ -227,13 +232,14 @@ def caminhaNoMapa(mapa, mapaJogador):
 
 		 	x = inducaoLogica(mapaJogador, i, j, ultimosVisitados)
 		 	flag=flag+1
-		 	if(flag==3):
-		 		print x 
+		 	# if(flag==3):
+		 	# 	pass
+		 		#print x 
 		 		#exit()
 		 	
 		if(iteracoes==50):
-			print i, j, angulo
-			printMapa(mapaProbabilidade)
+			#print i, j, angulo
+			#printMapa(mapaProbabilidade)
 	 		exit()
 
 	 	if(verificadorLoop==0):

@@ -27,12 +27,16 @@ if __name__ == "__main__":
                     [None,None,None,None],
                     [None,None,None,None]]
 
+    mapa_aux=mapa
 
     mapa =  definePocoWumpus(mapa)  #### ao fim mapa está pronto
     mapa = defineOuro(mapa)
-    caminho,mapa = caminhaNoMapa(mapa, mapaJogador)
+    caminho,mapa,sucesso = caminhaNoMapa(mapa, mapaJogador)
     gui = Gui()
-    gui.carrega_gui(caminho,mapa)
+    if(sucesso is True):
+        gui.carrega_gui(caminho,mapa)
+    else:
+        print "Game OVER, Execute novamente"
 
 
 

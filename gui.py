@@ -18,24 +18,16 @@ class Gui():
 
     def __init__(self):
          
-        print "GUIII"
-       # print "Caminho",caminho
-        #print "Mapa",mapa
-        # Define some colors
+       
         self.BLACK = (0, 0, 0)
         self.WHITE = (255, 255, 255)
         self.GREEN = (0, 255, 0)
         self.RED = (255, 0, 0)
-        self.YELLOWGREEN = (154,205,50)
+        self.GRAY = (224,224,224)
         self.BLUE = (0,191,255)
         self.GOLD = (255,215,0)
 
-
-        # #caminho do guerreiro
-        # self.posicoes=[[0,0],[0,1],[1,1],[2,1],[2,2],[2,3],[3,3]]
-        # self.evolucoes=[[2,3]]
-
-        self.reservado =["ouro","#"]
+        self.reservado =["ouro","#","@"]
         self.nivel_sayajin = 0
         self.posicoes=[]
         #posicoes de evolução proximas do wumpus.
@@ -57,12 +49,11 @@ class Gui():
             self.grid.append([])
             for column in range(4):
                 self.grid[row].append(0)  # Append a cell
-         
-        # # Set row 1, cell 5 to one. (Remember rows and
-        # # column numbers start at zero.)
-        # grid[0][0] = 1
-         
+
         # Initialize pygame
+        pygame.init()
+
+        #Iniatializa font
         pygame.init()
 
         # Set the WIDTH and HEIGHT of the screen
@@ -78,6 +69,19 @@ class Gui():
         # Used to manage how fast the screen updates
         self.clock = pygame.time.Clock()
 
+    def backlog(self):
+        print "-----------"
+        print "Pontuação: -",len(self.posicoes)
+        print "Caminho",self.posicoes
+        print "-----------"
+
+    def win(self):
+        self.screen.fill(self.BLACK)
+        perso = self.carrega_imagem("shenron")
+        self.screen.blit(perso,(0,50))
+        pygame.display.flip()
+        pygame.time.delay(100)
+
 
     def carrega_gui(self,caminho,mapa):
         print "-----------------------"
@@ -90,7 +94,7 @@ class Gui():
                     self.grid[i][j]= "#"
                 elif mapa[i][j] == "ouro":
                     self.grid[i][j] ="ouro"
-                elif mapa[i][j] == 1:
+                elif mapa[i][j] == 1 or mapa[i][j] == 3:
                     self.evolucoes.append([i,j])
         self.main()
 
@@ -125,8 +129,13 @@ class Gui():
             perso=self.carrega_imagem("personagem")
         return tela,perso
 
+    def preenche_quadrado(self,personagem,cor,linha,coluna):
+        """Preenche uma posicao especifica da matriz"""
+        self.desenha_quadrado(cor, linha, coluna)
+        self.carrega_personagem(personagem,linha,coluna)
+
     def carrega_personagem(self,personagem,row,column):
-        """Carrega o wumpus"""
+        """Carrega um elemento"""
         personagem = self.carrega_imagem(personagem)
         self.screen.blit(personagem,[(self.MARGIN + self.WIDTH) * column + self.MARGIN,
                           (self.MARGIN + self.HEIGHT) * row + self.MARGIN,
@@ -145,6 +154,7 @@ class Gui():
                                       self.HEIGHT])
 
     def main(self):
+        """Função principal"""
         self.grid= self.marca_evolucao(self.evolucoes,self.grid)
         cont_pos_max = len(self.posicoes)
         cont_pos_min = 0
@@ -159,21 +169,23 @@ class Gui():
             self.screen.fill(self.BLACK)
             # Draw the grid
             #Desenha o mapa
-            for row in range(4):
-                for column in range(4):
-                    color = self.YELLOWGREEN
-                    if self.grid[row][column] == "#":
-                        color = self.RED
-                        self.desenha_quadrado(color, row, column)
-                        self.carrega_personagem("wumpus",row,column)
-                    if self.grid[row][column] == "ouro":
-                        color = self.GOLD
-                        self.desenha_quadrado(color, row, column)
-                        self.carrega_personagem("esferas", row, column)
-                    elif self.grid[row][column] == "@":
-                        color = self.BLUE
-                    if self.grid[row][column] not in self.reservado:
-                        self.desenha_quadrado(color,row,column)
+            for linha in range(4):
+                for coluna in range(4):
+                    cor = self.GRAY
+                    if self.grid[linha][coluna] == "#":
+                        #cor = self.RED
+                        self.preenche_quadrado("wumpus", cor, linha, coluna)
+                        # self.desenha_quadrado(color, linha, coluna)
+                        # self.carrega_personagem("wumpus",linha,coluna)
+                    if self.grid[linha][coluna] == "ouro":
+                        #cor = self.GOLD
+                        self.preenche_quadrado("esferas", cor, linha, coluna)
+                        # self.desenha_quadrado(color, linha, coluna)
+                        # self.carrega_personagem("esferas", linha, coluna)
+                    elif self.grid[linha][coluna] == "@":
+                        self.preenche_quadrado("lake", cor, linha, coluna)
+                    if self.grid[linha][coluna] not in self.reservado:
+                        self.desenha_quadrado(cor,linha,coluna)
 
             #pygame.time.wait(30)
             # Limit to 60 frames per second
@@ -182,9 +194,13 @@ class Gui():
             pygame.display.flip()
 
             # Atualiza os deslocamentos
+          
             for pos in self.posicoes:
+                
                 row=pos[0]
                 column= pos[1]
+
+               
                 if(self.grid[row][column] == 2):
                     personagem= self.carrega_imagem("guerreiro_evoluindo")
                     self.screen,personagem = self.evolucao(self.screen, personagem,column, row)
@@ -195,20 +211,22 @@ class Gui():
                                   self.HEIGHT])
                 #pygame.time.wait(1000)
                 pygame.display.flip()
-                color= self.YELLOWGREEN
+                color= self.GRAY
                 pygame.draw.rect(self.screen,
                              color,
                              [(self.MARGIN + self.WIDTH) * column + self.MARGIN,
                               (self.MARGIN + self.HEIGHT) * row + self.MARGIN,
                               self.WIDTH,
                               self.HEIGHT])
-                pygame.time.delay(2000)
+                if(self.grid[row][column] == 'ouro'):
+                    self.backlog()
+                    self.win()
+                    pygame.quit()
+                    return 1
+                pygame.time.delay(500)
+                self.clock.tick(60)
                 pygame.display.flip()
 
             # Be IDLE friendly. If you forget this line, the program will 'hang'
             # on exit.
             pygame.quit()
-
-#if __name__ == '__main__':
-    # gui = Gui()
-    # gui.main()
