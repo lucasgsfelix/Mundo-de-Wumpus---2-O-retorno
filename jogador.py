@@ -131,7 +131,7 @@ def caminhaNoMapa(mapa, mapaJogador):
         # time.sleep(4)
         if(mapa[i][j] == 'ouro'):
             print 'PARABÉNS, VOCÊ CONSEGUIU ALCANÇAR O OURO !!!'
-            # print 'SUA PONTUAÇÃO FOI DE \n', pontuacao
+            print 'SUA PONTUAÇÃO FOI DE \n', pontuacao
             # print 'SUA LISTA DE AÇÕES FOI \n', ''.join(listaPontuacao)
             print 'SEU MAPA DESCOBERTO FOI \n', printMapa(mapaJogador)
             print 'O MAPA TOTAL ERA \n', printMapa(mapa)
